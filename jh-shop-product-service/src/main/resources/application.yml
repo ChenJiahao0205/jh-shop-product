@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: jh-shop-product-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/jh_shop_product?allowPublicKeyRetrieval=true&characterEncoding=UTF-8&useSSL=false&allowMultiQueries=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+server:
+  servlet:
+    context-path: /jh-shop-product-service
+  port: 8080
+
+#logging:
+#  level:
+#    org.springframework: DEBUG
+#    pers.jhshop.user: DEBUG

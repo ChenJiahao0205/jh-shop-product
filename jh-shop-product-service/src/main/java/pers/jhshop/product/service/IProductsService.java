@@ -1,0 +1,39 @@
+package pers.jhshop.product.service;
+
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.IService;
+import pers.jhshop.product.model.entity.Products;
+import pers.jhshop.product.model.req.ProductsCreateReq;
+import pers.jhshop.product.model.req.ProductsQueryReq;
+import pers.jhshop.product.model.req.ProductsUpdateReq;
+import pers.jhshop.product.model.vo.ProductsVO;
+import java.util.Map;
+import java.util.List;
+
+/**
+ * <p>
+ * 商品表 服务类
+ * </p>
+ *
+ * @author ChenJiahao(wutiao)
+ * @since 2024-12-02
+ */
+public interface IProductsService extends IService<Products> {
+
+    void createBiz(ProductsCreateReq createReq);
+
+    void updateBiz(ProductsUpdateReq updateReq);
+
+    ProductsVO getByIdBiz(Long id);
+
+    Page<ProductsVO> pageBiz(ProductsQueryReq queryReq);
+
+    Page<Products> page(ProductsQueryReq queryReq);
+
+    List<Products> listByQueryReq(ProductsQueryReq queryReq);
+
+    Map<Long, Products> getIdEntityMap(List<Long> ids);
+
+    Products getOneByQueryReq(ProductsQueryReq queryReq);
+
+}
