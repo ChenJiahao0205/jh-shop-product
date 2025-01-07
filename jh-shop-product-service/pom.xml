@@ -20,6 +20,13 @@
             <artifactId>jh-shop-product-api</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>pers.jhshop</groupId>
+            <artifactId>jh-shop-es-api</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
     </dependencies>
 
 </project>
