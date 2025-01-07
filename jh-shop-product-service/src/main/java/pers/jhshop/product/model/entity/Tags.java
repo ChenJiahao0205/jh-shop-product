@@ -36,6 +36,7 @@ public class Tags extends Model<Tags> {
 
     @ApiModelProperty(value = "商品ID，外键关联PRODUCTS表")
     @TableField("PRODUCT_ID")
+    @Deprecated
     private Integer productId;
 
     @ApiModelProperty(value = "标签名称")

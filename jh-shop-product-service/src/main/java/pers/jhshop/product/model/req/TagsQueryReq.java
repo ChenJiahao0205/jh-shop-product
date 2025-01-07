@@ -1,15 +1,15 @@
 package pers.jhshop.product.model.req;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import pers.jhshop.product.model.entity.Tags;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import pers.jhshop.product.model.entity.Tags;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <p>
@@ -29,6 +29,9 @@ public class TagsQueryReq extends Page<Tags> implements Serializable {
 
     @ApiModelProperty(value = "标签唯一标识")
     private Long id;
+
+    @ApiModelProperty(value = "id集合")
+    private List<Long> idList;
 
     @ApiModelProperty(value = "商品ID，外键关联PRODUCTS表")
     private Integer productId;

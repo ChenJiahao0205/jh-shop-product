@@ -1,15 +1,16 @@
 package pers.jhshop.product.model.req;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import pers.jhshop.product.model.entity.Categories;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import pers.jhshop.product.model.entity.Categories;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <p>
@@ -29,6 +30,9 @@ public class CategoriesQueryReq extends Page<Categories> implements Serializable
 
     @ApiModelProperty(value = "分类唯一标识")
     private Long id;
+
+    @ApiModelProperty(value = "id集合")
+    private List<Long> idList;
 
     @ApiModelProperty(value = "父级分类ID，0表示根分类")
     private Integer parentId;

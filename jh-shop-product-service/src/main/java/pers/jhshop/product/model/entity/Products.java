@@ -47,9 +47,19 @@ public class Products extends Model<Products> {
     @TableField("BRAND")
     private String brand;
 
-    @ApiModelProperty(value = "商品分类ID，外键关联CATEGORIES表")
-    @TableField("CATEGORY_ID")
-    private Integer categoryId;
+    /**
+     * TODO 数据库修改该字段为text
+     */
+    @ApiModelProperty(value = "商品分类ID数组字符串")
+    @TableField("PRODUCT_CATEGORY_ID_ARR")
+    private String productCategoryIdArr;
+
+    /**
+     * TODO 数据库修改该字段为text
+     */
+    @ApiModelProperty(value = "商品标签ID数组字符串")
+    @TableField("PRODUCT_TAG_ID_ARR")
+    private String productTagIdArr;
 
     @ApiModelProperty(value = "商品价格")
     @TableField("PRICE")

@@ -2,27 +2,31 @@ package pers.jhshop.product.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import lombok.RequiredArgsConstructor;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import pers.jhshop.common.exception.ServiceException;
+import pers.jhshop.product.mapper.TagsMapper;
+import pers.jhshop.product.model.entity.Tags;
 import pers.jhshop.product.model.req.TagsCreateReq;
 import pers.jhshop.product.model.req.TagsQueryReq;
 import pers.jhshop.product.model.req.TagsUpdateReq;
 import pers.jhshop.product.model.vo.TagsVO;
-import pers.jhshop.product.model.entity.Tags;
-import pers.jhshop.product.mapper.TagsMapper;
 import pers.jhshop.product.service.ITagsService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import pers.jhshop.common.exception.ServiceException;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.apache.commons.lang3.StringUtils;
-import java.util.*;
-import java.util.stream.Collectors;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -170,6 +174,8 @@ public class TagsServiceImpl extends ServiceImpl<TagsMapper, Tags> implements IT
         LambdaQueryWrapper<Tags> queryWrapper = Wrappers.lambdaQuery();
 
         queryWrapper.eq(Objects.nonNull(queryReq.getId()), Tags::getId, queryReq.getId());
+        queryWrapper.in(CollectionUtils.isNotEmpty(queryReq.getIdList()), Tags::getId, queryReq.getIdList());
+
         queryWrapper.eq(Objects.nonNull(queryReq.getProductId()), Tags::getProductId, queryReq.getProductId());
         queryWrapper.eq(StringUtils.isNotBlank(queryReq.getTagName()), Tags::getTagName, queryReq.getTagName());
         queryWrapper.like(StringUtils.isNotBlank(queryReq.getTagNameLike()), Tags::getTagName, queryReq.getTagNameLike());

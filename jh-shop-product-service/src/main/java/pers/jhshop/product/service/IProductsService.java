@@ -3,12 +3,14 @@ package pers.jhshop.product.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import pers.jhshop.product.model.entity.Products;
+import pers.jhshop.product.model.req.CombineCreateProductInfoReq;
 import pers.jhshop.product.model.req.ProductsCreateReq;
 import pers.jhshop.product.model.req.ProductsQueryReq;
 import pers.jhshop.product.model.req.ProductsUpdateReq;
 import pers.jhshop.product.model.vo.ProductsVO;
-import java.util.Map;
+
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -36,4 +38,8 @@ public interface IProductsService extends IService<Products> {
 
     Products getOneByQueryReq(ProductsQueryReq queryReq);
 
+    /**
+     * 商品相关信息联合创建Req
+     */
+    void combineCreateProductInfo(CombineCreateProductInfoReq combineCreateReq);
 }

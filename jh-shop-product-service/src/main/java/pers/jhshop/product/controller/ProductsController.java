@@ -1,16 +1,17 @@
 package pers.jhshop.product.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
 import pers.jhshop.common.entity.ResultBo;
 import pers.jhshop.product.consts.JhShopUserApiConstants;
+import pers.jhshop.product.model.req.CombineCreateProductInfoReq;
 import pers.jhshop.product.model.req.ProductsCreateReq;
 import pers.jhshop.product.model.req.ProductsQueryReq;
 import pers.jhshop.product.model.req.ProductsUpdateReq;
 import pers.jhshop.product.model.vo.ProductsVO;
 import pers.jhshop.product.service.IProductsService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
 /**
  * <p>
  * 商品表 前端控制器
@@ -48,6 +49,12 @@ public class ProductsController {
     public ResultBo<Page<ProductsVO>> page(@RequestBody ProductsQueryReq queryReq) {
         Page page = productsService.pageBiz(queryReq);
         return ResultBo.success(page);
+    }
+
+    @PostMapping("combineCreateProductInfo")
+    public ResultBo combineCreateProductInfo(@RequestBody CombineCreateProductInfoReq combineCreateReq) {
+        productsService.combineCreateProductInfo(combineCreateReq);
+        return ResultBo.success();
     }
 }
 
