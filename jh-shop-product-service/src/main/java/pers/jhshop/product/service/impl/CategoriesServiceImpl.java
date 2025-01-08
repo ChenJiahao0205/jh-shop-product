@@ -221,7 +221,7 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
         // 梳理标签层级关系
         // 获取所有根分类，并转换为CategoryIdAndName
         List<AllCategoriesInfoVO.CategoryIdAndName> allRootCategoryList = allCategoryList.stream()
-                .filter(c -> Objects.equals(c.getParentId(), 0))
+                .filter(c -> Objects.equals(c.getParentId(), 0L))
                 .map(c ->{
                     AllCategoriesInfoVO.CategoryIdAndName categoryIdAndName = new AllCategoriesInfoVO.CategoryIdAndName();
                     categoryIdAndName.setProductCategoryId(c.getId());
@@ -232,7 +232,7 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
 
         // 获取所有非根类标签
         allCategoryList.stream()
-                .filter(c -> !Objects.equals(c.getParentId(), 0))
+                .filter(c -> !Objects.equals(c.getParentId(), 0L))
                 .forEach(c ->{
                     // 填充到对应的父类中
                     Optional<AllCategoriesInfoVO.CategoryIdAndName> first = allRootCategoryList.stream()
