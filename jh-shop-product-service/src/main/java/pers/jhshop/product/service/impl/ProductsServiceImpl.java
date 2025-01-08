@@ -323,6 +323,14 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         if (StringUtils.isBlank(combineCreateReq.getProductImageUrl())){
             throw new ServiceException("商品主图URL不能为空");
         }
+
+        // 商品名称重复性校验
+        ProductsQueryReq productsQueryReq = new ProductsQueryReq();
+        productsQueryReq.setName(combineCreateReq.getProductName());
+        Products oneByQueryReq = getOneByQueryReq(productsQueryReq);
+        if (Objects.nonNull(oneByQueryReq)){
+            throw new ServiceException("商品名称不能重复");
+        }
     }
 
     private LambdaQueryWrapper<Products> getLambdaQueryWrapper(ProductsQueryReq queryReq) {
