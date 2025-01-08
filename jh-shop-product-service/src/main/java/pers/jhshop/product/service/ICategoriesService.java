@@ -6,6 +6,7 @@ import pers.jhshop.product.model.entity.Categories;
 import pers.jhshop.product.model.req.CategoriesCreateReq;
 import pers.jhshop.product.model.req.CategoriesQueryReq;
 import pers.jhshop.product.model.req.CategoriesUpdateReq;
+import pers.jhshop.product.model.vo.AllCategoriesInfoVO;
 import pers.jhshop.product.model.vo.CategoriesVO;
 import java.util.Map;
 import java.util.List;
@@ -36,4 +37,8 @@ public interface ICategoriesService extends IService<Categories> {
 
     Categories getOneByQueryReq(CategoriesQueryReq queryReq);
 
+    /**
+     * 查询所有商品标签
+     */
+    AllCategoriesInfoVO getAllProductCategories();
 }

@@ -6,6 +6,7 @@ import pers.jhshop.product.consts.JhShopUserApiConstants;
 import pers.jhshop.product.model.req.CategoriesCreateReq;
 import pers.jhshop.product.model.req.CategoriesQueryReq;
 import pers.jhshop.product.model.req.CategoriesUpdateReq;
+import pers.jhshop.product.model.vo.AllCategoriesInfoVO;
 import pers.jhshop.product.model.vo.CategoriesVO;
 import pers.jhshop.product.service.ICategoriesService;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +49,11 @@ public class CategoriesController {
     public ResultBo<Page<CategoriesVO>> page(@RequestBody CategoriesQueryReq queryReq) {
         Page page = categoriesService.pageBiz(queryReq);
         return ResultBo.success(page);
+    }
+
+    @GetMapping("get-all-product-categories")
+    public ResultBo<AllCategoriesInfoVO> getAllProductCategories(){
+        return ResultBo.success(categoriesService.getAllProductCategories());
     }
 }
 

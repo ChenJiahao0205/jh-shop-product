@@ -31,7 +31,7 @@ public class CategoriesUpdateReq implements Serializable {
     private Long id;
 
     @ApiModelProperty(value = "父级分类ID，0表示根分类")
-    private Integer parentId;
+    private Long parentId;
 
     @ApiModelProperty(value = "分类名称(如“手机”，“家电”，“衣物”等)")
     private String name;

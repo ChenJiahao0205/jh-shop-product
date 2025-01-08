@@ -18,13 +18,11 @@ import pers.jhshop.product.model.entity.Categories;
 import pers.jhshop.product.model.req.CategoriesCreateReq;
 import pers.jhshop.product.model.req.CategoriesQueryReq;
 import pers.jhshop.product.model.req.CategoriesUpdateReq;
+import pers.jhshop.product.model.vo.AllCategoriesInfoVO;
 import pers.jhshop.product.model.vo.CategoriesVO;
 import pers.jhshop.product.service.ICategoriesService;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -73,6 +71,8 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
         if (!insertResult) {
             throw new ServiceException("数据插入失败");
         }
+
+        // TODO 更新 Redis
     }
 
     @Override
@@ -115,6 +115,8 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
         if (!updateResult) {
             throw new ServiceException("数据更新失败");
         }
+
+        // TODO 更新 Redis
     }
 
     @Override
@@ -203,6 +205,58 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
         }
 
         return listByQueryReq.get(0);
+    }
+
+    @Override
+    public AllCategoriesInfoVO getAllProductCategories() {
+        // TODO 优先查询Redis
+
+        AllCategoriesInfoVO allCategoriesInfoVO = new AllCategoriesInfoVO();
+        // 查询出所有标签
+        List<Categories> allCategoryList = list();
+        if (CollectionUtils.isEmpty(allCategoryList)){
+           return allCategoriesInfoVO;
+        }
+
+        // 梳理标签层级关系
+        // 获取所有根分类，并转换为CategoryIdAndName
+        List<AllCategoriesInfoVO.CategoryIdAndName> allRootCategoryList = allCategoryList.stream()
+                .filter(c -> Objects.equals(c.getParentId(), 0))
+                .map(c ->{
+                    AllCategoriesInfoVO.CategoryIdAndName categoryIdAndName = new AllCategoriesInfoVO.CategoryIdAndName();
+                    categoryIdAndName.setProductCategoryId(c.getId());
+                    categoryIdAndName.setProductCategoryName(c.getName());
+                    return categoryIdAndName;
+                })
+                .collect(Collectors.toList());
+
+        // 获取所有非根类标签
+        allCategoryList.stream()
+                .filter(c -> !Objects.equals(c.getParentId(), 0))
+                .forEach(c ->{
+                    // 填充到对应的父类中
+                    Optional<AllCategoriesInfoVO.CategoryIdAndName> first = allRootCategoryList.stream()
+                            .filter(root -> Objects.equals(c.getParentId(), root.getProductCategoryId()))
+                            .findFirst();
+
+                    if (first.isPresent()){
+                        AllCategoriesInfoVO.CategoryIdAndName parentCategoryIdAndName = first.get();
+                        List<AllCategoriesInfoVO.CategoryIdAndName> subCategoryIdAndNameList = parentCategoryIdAndName.getSubCategoryIdAndNameList();
+                        if (CollectionUtils.isEmpty(subCategoryIdAndNameList)){
+                            subCategoryIdAndNameList = new ArrayList<>();
+                        }
+
+                        AllCategoriesInfoVO.CategoryIdAndName subCategoryIdAndName = new AllCategoriesInfoVO.CategoryIdAndName();
+                        subCategoryIdAndName.setProductCategoryId(c.getId());
+                        subCategoryIdAndName.setProductCategoryName(c.getName());
+                        subCategoryIdAndNameList.add(subCategoryIdAndName);
+                        parentCategoryIdAndName.setSubCategoryIdAndNameList(subCategoryIdAndNameList);
+                    }
+                });
+
+        // TODO 递归填充
+
+        return allCategoriesInfoVO;
     }
 
     private LambdaQueryWrapper<Categories> getLambdaQueryWrapper(CategoriesQueryReq queryReq) {
