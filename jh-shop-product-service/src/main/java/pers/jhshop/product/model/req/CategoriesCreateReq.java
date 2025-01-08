@@ -31,15 +31,6 @@ public class CategoriesCreateReq implements Serializable {
     @ApiModelProperty(value = "分类名称(如“手机”，“家电”，“衣物”等)")
     private String name;
 
-    @ApiModelProperty(value = "分类描述")
-    private String productCategoriesDescription;
-
-    @ApiModelProperty(value = "分类创建时间")
-    private LocalDateTime createdAt;
-
-    @ApiModelProperty(value = "分类最后更新时间")
-    private LocalDateTime updatedAt;
-
     @ApiModelProperty(value = "描述")
     private String description;
 

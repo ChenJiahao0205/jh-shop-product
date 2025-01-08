@@ -5,11 +5,10 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import pers.jhshop.common.entity.BaseVo;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-
-import pers.jhshop.common.entity.BaseVo;
 
 /**
  * <p>
@@ -36,16 +35,16 @@ public class CategoriesVO extends BaseVo implements Serializable {
     @ApiModelProperty(value = "分类名称(如“手机”，“家电”，“衣物”等)")
     private String name;
 
-    @ApiModelProperty(value = "分类描述")
-    private String productCategoriesDescription;
-
-    @ApiModelProperty(value = "分类创建时间")
-    private LocalDateTime createdAt;
-
-    @ApiModelProperty(value = "分类最后更新时间")
-    private LocalDateTime updatedAt;
-
     @ApiModelProperty(value = "描述")
     private String description;
+
+    @ApiModelProperty(value = "生效标志(TRUE-生效, FALSE-失效)")
+    private Boolean validFlag;
+
+    @ApiModelProperty(value = "创建时间")
+    private LocalDateTime createTime;
+
+    @ApiModelProperty(value = "更新时间")
+    private LocalDateTime updateTime;
 
 }

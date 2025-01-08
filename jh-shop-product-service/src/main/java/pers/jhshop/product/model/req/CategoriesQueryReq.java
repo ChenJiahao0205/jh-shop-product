@@ -43,23 +43,17 @@ public class CategoriesQueryReq extends Page<Categories> implements Serializable
     @ApiModelProperty(value = "分类名称(如“手机”，“家电”，“衣物”等)-模糊匹配")
     private String nameLike;
 
-    @ApiModelProperty(value = "分类描述")
-    private String productCategoriesDescription;
-
-    @ApiModelProperty(value = "分类描述-模糊匹配")
-    private String productCategoriesDescriptionLike;
-
-    @ApiModelProperty(value = "分类创建时间")
-    private LocalDateTime createdAt;
-
-    @ApiModelProperty(value = "分类最后更新时间")
-    private LocalDateTime updatedAt;
-
     @ApiModelProperty(value = "描述")
     private String description;
 
     @ApiModelProperty(value = "描述-模糊匹配")
     private String descriptionLike;
+
+    @ApiModelProperty(value = "创建时间")
+    private LocalDateTime createTime;
+
+    @ApiModelProperty(value = "更新时间")
+    private LocalDateTime updateTime;
 
     @ApiModelProperty(value = "生效标志(TRUE-生效, FALSE-失效)")
     private Boolean validFlag;

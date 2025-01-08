@@ -45,11 +45,25 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void createBiz(CategoriesCreateReq createReq) {
-        if (Objects.isNull(createReq.getName())) {
-            throw new ServiceException("分类名称(如“手机”，“家电”，“衣物”等)不能为空");
+        if (Objects.isNull(createReq.getParentId())){
+            throw new ServiceException("分类父ID不能为空");
         }
 
+        if (StringUtils.isBlank(createReq.getName())) {
+            throw new ServiceException("分类名称不能为空");
+        }
 
+        if (StringUtils.isBlank(createReq.getDescription())) {
+            throw new ServiceException("分类描述不能为空");
+        }
+
+        // 重复性判断 名称不能重复
+        CategoriesQueryReq categoriesQueryReq = new CategoriesQueryReq();
+        categoriesQueryReq.setName(createReq.getName());
+        Categories oneByQueryReq = getOneByQueryReq(categoriesQueryReq);
+        if (Objects.nonNull(oneByQueryReq)){
+            throw new ServiceException("分类名称不能重复");
+        }
 
         Categories entity = new Categories();
         BeanUtil.copyProperties(createReq, entity);
@@ -64,10 +78,21 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateBiz(CategoriesUpdateReq updateReq) {
-
         // 1.入参有效性判断
         if (Objects.isNull(updateReq.getId())) {
             throw new ServiceException("id不能为空");
+        }
+
+        if (Objects.isNull(updateReq.getParentId())){
+            throw new ServiceException("分类父ID不能为空");
+        }
+
+        if (StringUtils.isBlank(updateReq.getName())) {
+            throw new ServiceException("分类名称不能为空");
+        }
+
+        if (StringUtils.isBlank(updateReq.getDescription())) {
+            throw new ServiceException("分类描述不能为空");
         }
 
         Categories entity = getById(updateReq.getId());
@@ -75,7 +100,14 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
             throw new ServiceException("商品分类表不存在");
         }
 
-        // 2.重复性判断
+        // 2.重复性判断 名称不能重复
+        CategoriesQueryReq categoriesQueryReq = new CategoriesQueryReq();
+        categoriesQueryReq.setName(updateReq.getName());
+        Categories oneByQueryReq = getOneByQueryReq(categoriesQueryReq);
+        if (Objects.nonNull(oneByQueryReq) && !Objects.equals(oneByQueryReq.getId(), updateReq.getId())) {
+            throw new ServiceException("分类名称不能重复");
+        }
+
         Categories entityToUpdate = new Categories();
         BeanUtil.copyProperties(updateReq, entityToUpdate);
 
@@ -101,7 +133,7 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
         CategoriesVO vo = new CategoriesVO();
         BeanUtil.copyProperties(entity, vo);
 
-            return vo;
+        return vo;
     }
 
     @Override
@@ -122,7 +154,6 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
         List<CategoriesVO> vos = records.stream().map(record -> {
             CategoriesVO vo = new CategoriesVO();
             BeanUtil.copyProperties(record, vo);
-    
             return vo;
         }).collect(Collectors.toList());
 
@@ -183,10 +214,6 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
         queryWrapper.eq(Objects.nonNull(queryReq.getParentId()), Categories::getParentId, queryReq.getParentId());
         queryWrapper.eq(StringUtils.isNotBlank(queryReq.getName()), Categories::getName, queryReq.getName());
         queryWrapper.like(StringUtils.isNotBlank(queryReq.getNameLike()), Categories::getName, queryReq.getNameLike());
-        queryWrapper.eq(StringUtils.isNotBlank(queryReq.getProductCategoriesDescription()), Categories::getProductCategoriesDescription, queryReq.getProductCategoriesDescription());
-        queryWrapper.like(StringUtils.isNotBlank(queryReq.getProductCategoriesDescriptionLike()), Categories::getProductCategoriesDescription, queryReq.getProductCategoriesDescriptionLike());
-        queryWrapper.eq(Objects.nonNull(queryReq.getCreatedAt()), Categories::getCreatedAt, queryReq.getCreatedAt());
-        queryWrapper.eq(Objects.nonNull(queryReq.getUpdatedAt()), Categories::getUpdatedAt, queryReq.getUpdatedAt());
         queryWrapper.eq(StringUtils.isNotBlank(queryReq.getDescription()), Categories::getDescription, queryReq.getDescription());
         queryWrapper.like(StringUtils.isNotBlank(queryReq.getDescriptionLike()), Categories::getDescription, queryReq.getDescriptionLike());
         queryWrapper.eq(Objects.nonNull(queryReq.getValidFlag()), Categories::getValidFlag, queryReq.getValidFlag());

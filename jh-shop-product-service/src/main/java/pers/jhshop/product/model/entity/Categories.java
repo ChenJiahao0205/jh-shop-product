@@ -42,18 +42,6 @@ public class Categories extends Model<Categories> {
     @TableField("NAME")
     private String name;
 
-    @ApiModelProperty(value = "分类描述")
-    @TableField("PRODUCT_CATEGORIES_DESCRIPTION")
-    private String productCategoriesDescription;
-
-    @ApiModelProperty(value = "分类创建时间")
-    @TableField("CREATED_AT")
-    private LocalDateTime createdAt;
-
-    @ApiModelProperty(value = "分类最后更新时间")
-    @TableField("UPDATED_AT")
-    private LocalDateTime updatedAt;
-
     @ApiModelProperty(value = "描述")
     @TableField("DESCRIPTION")
     private String description;
