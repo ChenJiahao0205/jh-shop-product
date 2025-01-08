@@ -34,11 +34,6 @@ public class Tags extends Model<Tags> {
     @TableId(value = "ID", type = IdType.AUTO)
     private Long id;
 
-    @ApiModelProperty(value = "商品ID，外键关联PRODUCTS表")
-    @TableField("PRODUCT_ID")
-    @Deprecated
-    private Integer productId;
-
     @ApiModelProperty(value = "标签名称")
     @TableField("TAG_NAME")
     private String tagName;

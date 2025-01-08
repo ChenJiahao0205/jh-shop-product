@@ -30,9 +30,6 @@ public class TagsUpdateReq implements Serializable {
     @ApiModelProperty(value = "标签唯一标识")
     private Long id;
 
-    @ApiModelProperty(value = "商品ID，外键关联PRODUCTS表")
-    private Integer productId;
-
     @ApiModelProperty(value = "标签名称")
     private String tagName;
 

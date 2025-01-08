@@ -25,9 +25,6 @@ public class TagsCreateReq implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty(value = "商品ID，外键关联PRODUCTS表")
-    private Integer productId;
-
     @ApiModelProperty(value = "标签名称")
     private String tagName;
 

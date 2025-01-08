@@ -45,7 +45,21 @@ public class TagsServiceImpl extends ServiceImpl<TagsMapper, Tags> implements IT
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void createBiz(TagsCreateReq createReq) {
+        if (StringUtils.isBlank(createReq.getTagName())){
+            throw new ServiceException("标签名称不能为空");
+        }
 
+        if (StringUtils.isBlank(createReq.getDescription())){
+            throw new ServiceException("标签描述不能为空");
+        }
+
+        // 重复性校验 名称重复校验
+        TagsQueryReq tagsQueryReq = new TagsQueryReq();
+        tagsQueryReq.setTagName(createReq.getTagName());
+        Tags oneByQueryReq = getOneByQueryReq(tagsQueryReq);
+        if (Objects.nonNull(oneByQueryReq)){
+            throw new ServiceException("标签名称不能重复");
+        }
 
         Tags entity = new Tags();
         BeanUtil.copyProperties(createReq, entity);
@@ -66,12 +80,27 @@ public class TagsServiceImpl extends ServiceImpl<TagsMapper, Tags> implements IT
             throw new ServiceException("id不能为空");
         }
 
+        if (StringUtils.isBlank(updateReq.getTagName())) {
+            throw new ServiceException("标签名称不能为空");
+        }
+
+        if (StringUtils.isBlank(updateReq.getDescription())) {
+            throw new ServiceException("标签描述不能为空");
+        }
+
         Tags entity = getById(updateReq.getId());
         if (Objects.isNull(entity)) {
             throw new ServiceException("商品标签表不存在");
         }
 
-        // 2.重复性判断
+        // 2.重复性判断 名称重复校验
+        TagsQueryReq tagsQueryReq = new TagsQueryReq();
+        tagsQueryReq.setTagName(updateReq.getTagName());
+        Tags oneByQueryReq = getOneByQueryReq(tagsQueryReq);
+        if (Objects.nonNull(oneByQueryReq) && !Objects.equals(oneByQueryReq.getId(), updateReq.getId())) {
+            throw new ServiceException("标签名称不能重复");
+        }
+
         Tags entityToUpdate = new Tags();
         BeanUtil.copyProperties(updateReq, entityToUpdate);
 
@@ -176,7 +205,6 @@ public class TagsServiceImpl extends ServiceImpl<TagsMapper, Tags> implements IT
         queryWrapper.eq(Objects.nonNull(queryReq.getId()), Tags::getId, queryReq.getId());
         queryWrapper.in(CollectionUtils.isNotEmpty(queryReq.getIdList()), Tags::getId, queryReq.getIdList());
 
-        queryWrapper.eq(Objects.nonNull(queryReq.getProductId()), Tags::getProductId, queryReq.getProductId());
         queryWrapper.eq(StringUtils.isNotBlank(queryReq.getTagName()), Tags::getTagName, queryReq.getTagName());
         queryWrapper.like(StringUtils.isNotBlank(queryReq.getTagNameLike()), Tags::getTagName, queryReq.getTagNameLike());
         queryWrapper.eq(StringUtils.isNotBlank(queryReq.getDescription()), Tags::getDescription, queryReq.getDescription());

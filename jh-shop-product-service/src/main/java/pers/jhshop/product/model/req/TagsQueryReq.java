@@ -9,6 +9,7 @@ import lombok.experimental.Accessors;
 import pers.jhshop.product.model.entity.Tags;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -33,9 +34,6 @@ public class TagsQueryReq extends Page<Tags> implements Serializable {
     @ApiModelProperty(value = "id集合")
     private List<Long> idList;
 
-    @ApiModelProperty(value = "商品ID，外键关联PRODUCTS表")
-    private Integer productId;
-
     @ApiModelProperty(value = "标签名称")
     private String tagName;
 
@@ -51,6 +49,9 @@ public class TagsQueryReq extends Page<Tags> implements Serializable {
     @ApiModelProperty(value = "生效标志(TRUE-生效, FALSE-失效)")
     private Boolean validFlag;
 
+    @ApiModelProperty(value = "创建时间")
+    private LocalDateTime createTime;
 
-
+    @ApiModelProperty(value = "更新时间")
+    private LocalDateTime updateTime;
 }

@@ -5,11 +5,10 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import pers.jhshop.common.entity.BaseVo;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-
-import pers.jhshop.common.entity.BaseVo;
 
 /**
  * <p>
@@ -30,13 +29,18 @@ public class TagsVO extends BaseVo implements Serializable {
     @ApiModelProperty(value = "标签唯一标识")
     private Long id;
 
-    @ApiModelProperty(value = "商品ID，外键关联PRODUCTS表")
-    private Integer productId;
-
     @ApiModelProperty(value = "标签名称")
     private String tagName;
 
     @ApiModelProperty(value = "描述")
     private String description;
 
+    @ApiModelProperty(value = "生效标志(TRUE-生效, FALSE-失效)")
+    private Boolean validFlag;
+
+    @ApiModelProperty(value = "创建时间")
+    private LocalDateTime createTime;
+
+    @ApiModelProperty(value = "更新时间")
+    private LocalDateTime updateTime;
 }
