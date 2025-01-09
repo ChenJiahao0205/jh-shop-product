@@ -78,7 +78,7 @@ public class TagsServiceImpl extends ServiceImpl<TagsMapper, Tags> implements IT
         }
 
         // 更新缓存
-        updateRedis();
+        updateRedisAllProductTags();
 
     }
 
@@ -121,7 +121,7 @@ public class TagsServiceImpl extends ServiceImpl<TagsMapper, Tags> implements IT
         }
 
         // 更新缓存
-        updateRedis();
+        updateRedisAllProductTags();
     }
 
     @Override
@@ -251,7 +251,7 @@ public class TagsServiceImpl extends ServiceImpl<TagsMapper, Tags> implements IT
         allLabelIdAndNameAndSubVO.setAllCategoriesInfo(allLabelInfoList);
 
         // 更新缓存
-        updateRedis(allLabelIdAndNameAndSubVO);
+        updateRedisAllProductTags(allLabelIdAndNameAndSubVO);
 
         return allLabelIdAndNameAndSubVO;
     }
@@ -259,14 +259,14 @@ public class TagsServiceImpl extends ServiceImpl<TagsMapper, Tags> implements IT
     /**
      * 将所有商品标签存入缓存
      */
-    private void updateRedis() {
-        stringRedisTemplate.opsForValue().set(RedisKeyConstants.ALL_PRODUCT_TAG_REDIS_KEY, JSONObject.toJSONString(getAllProductTags(false)));
+    private void updateRedisAllProductTags() {
+        updateRedisAllProductTags(getAllProductTags(false));
     }
 
     /**
      * 将所有商品标签存入缓存
      */
-    private void updateRedis(AllLabelIdAndNameAndSubVO allLabelIdAndNameAndSubVO) {
+    private void updateRedisAllProductTags(AllLabelIdAndNameAndSubVO allLabelIdAndNameAndSubVO) {
         stringRedisTemplate.opsForValue().set(RedisKeyConstants.ALL_PRODUCT_TAG_REDIS_KEY, JSONObject.toJSONString(allLabelIdAndNameAndSubVO));
     }
 
