@@ -6,6 +6,7 @@ import pers.jhshop.product.model.entity.Tags;
 import pers.jhshop.product.model.req.TagsCreateReq;
 import pers.jhshop.product.model.req.TagsQueryReq;
 import pers.jhshop.product.model.req.TagsUpdateReq;
+import pers.jhshop.product.model.vo.AllLabelIdAndNameAndSubVO;
 import pers.jhshop.product.model.vo.TagsVO;
 import java.util.Map;
 import java.util.List;
@@ -36,4 +37,8 @@ public interface ITagsService extends IService<Tags> {
 
     Tags getOneByQueryReq(TagsQueryReq queryReq);
 
+    /**
+     * 获取所有的商品标签
+     */
+    AllLabelIdAndNameAndSubVO getAllProductTags();
 }

@@ -6,6 +6,7 @@ import pers.jhshop.product.consts.JhShopUserApiConstants;
 import pers.jhshop.product.model.req.TagsCreateReq;
 import pers.jhshop.product.model.req.TagsQueryReq;
 import pers.jhshop.product.model.req.TagsUpdateReq;
+import pers.jhshop.product.model.vo.AllLabelIdAndNameAndSubVO;
 import pers.jhshop.product.model.vo.TagsVO;
 import pers.jhshop.product.service.ITagsService;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +49,11 @@ public class TagsController {
     public ResultBo<Page<TagsVO>> page(@RequestBody TagsQueryReq queryReq) {
         Page page = tagsService.pageBiz(queryReq);
         return ResultBo.success(page);
+    }
+
+    @GetMapping("get-all-product-tags")
+    public ResultBo<AllLabelIdAndNameAndSubVO> getAllProductTags(){
+        return ResultBo.success(tagsService.getAllProductTags());
     }
 }
 

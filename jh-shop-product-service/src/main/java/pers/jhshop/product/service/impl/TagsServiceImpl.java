@@ -1,6 +1,8 @@
 package pers.jhshop.product.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -9,15 +11,19 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pers.jhshop.common.exception.ServiceException;
+import pers.jhshop.product.consts.RedisKeyConstants;
 import pers.jhshop.product.mapper.TagsMapper;
 import pers.jhshop.product.model.entity.Tags;
 import pers.jhshop.product.model.req.TagsCreateReq;
 import pers.jhshop.product.model.req.TagsQueryReq;
 import pers.jhshop.product.model.req.TagsUpdateReq;
+import pers.jhshop.product.model.vo.AllLabelIdAndNameAndSubVO;
 import pers.jhshop.product.model.vo.TagsVO;
 import pers.jhshop.product.service.ITagsService;
 
@@ -41,6 +47,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TagsServiceImpl extends ServiceImpl<TagsMapper, Tags> implements ITagsService {
 
+    private final StringRedisTemplate stringRedisTemplate;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -69,6 +76,10 @@ public class TagsServiceImpl extends ServiceImpl<TagsMapper, Tags> implements IT
         if (!insertResult) {
             throw new ServiceException("数据插入失败");
         }
+
+        // 更新缓存
+        updateRedis();
+
     }
 
     @Override
@@ -108,6 +119,9 @@ public class TagsServiceImpl extends ServiceImpl<TagsMapper, Tags> implements IT
         if (!updateResult) {
             throw new ServiceException("数据更新失败");
         }
+
+        // 更新缓存
+        updateRedis();
     }
 
     @Override
@@ -197,6 +211,63 @@ public class TagsServiceImpl extends ServiceImpl<TagsMapper, Tags> implements IT
         }
 
         return listByQueryReq.get(0);
+    }
+
+    @Override
+    public AllLabelIdAndNameAndSubVO getAllProductTags() {
+        return getAllProductTags(true);
+    }
+
+    /**
+     * 获取所有商品标签（是否查询缓存）
+     * @param queryRedisFlag
+     * @return true：查询缓存，false：跳过缓存，直接查询数据库
+     */
+    private AllLabelIdAndNameAndSubVO getAllProductTags(Boolean queryRedisFlag) {
+        // 优先查询缓存
+        if (BooleanUtils.isTrue(queryRedisFlag)){
+            String AllProductTagsStr = stringRedisTemplate.opsForValue().get(RedisKeyConstants.ALL_PRODUCT_TAG_REDIS_KEY);
+            if (StringUtils.isBlank(AllProductTagsStr)){
+                return JSON.parseObject(AllProductTagsStr, AllLabelIdAndNameAndSubVO.class);
+            }
+        }
+
+        AllLabelIdAndNameAndSubVO allLabelIdAndNameAndSubVO = new AllLabelIdAndNameAndSubVO();
+        // 查询所有标签
+        List<Tags> allProductTags = list();
+        if (CollectionUtils.isEmpty(allProductTags)){
+            return allLabelIdAndNameAndSubVO;
+        }
+
+        // 转换为VO
+        List<AllLabelIdAndNameAndSubVO.LabelIdAndNameAndSub> allLabelInfoList = allProductTags.stream()
+                .map(tag ->{
+                    AllLabelIdAndNameAndSubVO.LabelIdAndNameAndSub labelIdAndNameAndSub = new AllLabelIdAndNameAndSubVO.LabelIdAndNameAndSub();
+                    labelIdAndNameAndSub.setLabelId(tag.getId());
+                    labelIdAndNameAndSub.setLabelName(tag.getTagName());
+                    return labelIdAndNameAndSub;
+                })
+                .collect(Collectors.toList());
+        allLabelIdAndNameAndSubVO.setAllCategoriesInfo(allLabelInfoList);
+
+        // 更新缓存
+        updateRedis(allLabelIdAndNameAndSubVO);
+
+        return allLabelIdAndNameAndSubVO;
+    }
+
+    /**
+     * 将所有商品标签存入缓存
+     */
+    private void updateRedis() {
+        stringRedisTemplate.opsForValue().set(RedisKeyConstants.ALL_PRODUCT_TAG_REDIS_KEY, JSONObject.toJSONString(getAllProductTags(false)));
+    }
+
+    /**
+     * 将所有商品标签存入缓存
+     */
+    private void updateRedis(AllLabelIdAndNameAndSubVO allLabelIdAndNameAndSubVO) {
+        stringRedisTemplate.opsForValue().set(RedisKeyConstants.ALL_PRODUCT_TAG_REDIS_KEY, JSONObject.toJSONString(allLabelIdAndNameAndSubVO));
     }
 
     private LambdaQueryWrapper<Tags> getLambdaQueryWrapper(TagsQueryReq queryReq) {
