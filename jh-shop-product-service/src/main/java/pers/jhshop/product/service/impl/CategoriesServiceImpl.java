@@ -19,7 +19,7 @@ import pers.jhshop.product.model.entity.Categories;
 import pers.jhshop.product.model.req.CategoriesCreateReq;
 import pers.jhshop.product.model.req.CategoriesQueryReq;
 import pers.jhshop.product.model.req.CategoriesUpdateReq;
-import pers.jhshop.product.model.vo.AllCategoriesInfoVO;
+import pers.jhshop.product.model.vo.AllLabelIdAndNameAndSubVO;
 import pers.jhshop.product.model.vo.CategoriesVO;
 import pers.jhshop.product.service.ICategoriesService;
 
@@ -209,14 +209,14 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
     }
 
     @Override
-    public AllCategoriesInfoVO getAllProductCategories() {
+    public AllLabelIdAndNameAndSubVO getAllProductCategories() {
         // TODO 优先查询Redis
 
-        AllCategoriesInfoVO allCategoriesInfoVO = new AllCategoriesInfoVO();
+        AllLabelIdAndNameAndSubVO allLabelIdAndNameAndSubVO = new AllLabelIdAndNameAndSubVO();
         // 查询出所有标签
         List<Categories> allCategoryList = list();
         if (CollectionUtils.isEmpty(allCategoryList)){
-           return allCategoriesInfoVO;
+           return allLabelIdAndNameAndSubVO;
         }
 
         // 根据parent_id对商品类型进行分组
@@ -224,16 +224,16 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
                 .collect(Collectors.groupingBy(Categories::getParentId));
 
         // 梳理标签层级关系（递归填充获取分类）
-        List<AllCategoriesInfoVO.CategoryIdAndName> allRootCategoryList = buildProductCategoryTree(CategoryParentIdLevelEnum.ROOT_CATEGORY.getValue(), parentIdAndCategoryMap);
-        allCategoriesInfoVO.setAllCategoriesInfo(allRootCategoryList);
-        return allCategoriesInfoVO;
+        List<AllLabelIdAndNameAndSubVO.LabelIdAndNameAndSub> allRootCategoryList = buildProductCategoryTree(CategoryParentIdLevelEnum.ROOT_CATEGORY.getValue(), parentIdAndCategoryMap);
+        allLabelIdAndNameAndSubVO.setAllCategoriesInfo(allRootCategoryList);
+        return allLabelIdAndNameAndSubVO;
     }
 
     /**
      * 梳理标签层级关系（递归填充获取分类）
      */
-    private List<AllCategoriesInfoVO.CategoryIdAndName> buildProductCategoryTree(Long parentId, Map<Long, List<Categories>> parentIdAndCategoryMap) {
-        List<AllCategoriesInfoVO.CategoryIdAndName> result = new ArrayList<>();
+    private List<AllLabelIdAndNameAndSubVO.LabelIdAndNameAndSub> buildProductCategoryTree(Long parentId, Map<Long, List<Categories>> parentIdAndCategoryMap) {
+        List<AllLabelIdAndNameAndSubVO.LabelIdAndNameAndSub> result = new ArrayList<>();
 
         // 根据父ID从map中获取当前层级的子标签
         List<Categories> childrenCategories = parentIdAndCategoryMap.get(parentId);
@@ -244,13 +244,13 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
 
         // 遍历子标签集合
         childrenCategories.forEach(c ->{
-            AllCategoriesInfoVO.CategoryIdAndName categoryIdAndName = new AllCategoriesInfoVO.CategoryIdAndName();
-            categoryIdAndName.setProductCategoryId(c.getId());
-            categoryIdAndName.setProductCategoryName(c.getName());
+            AllLabelIdAndNameAndSubVO.LabelIdAndNameAndSub labelIdAndNameAndSub = new AllLabelIdAndNameAndSubVO.LabelIdAndNameAndSub();
+            labelIdAndNameAndSub.setLabelId(c.getId());
+            labelIdAndNameAndSub.setLabelName(c.getName());
             // 继续查找子标签
-            categoryIdAndName.setSubCategoryIdAndNameList(buildProductCategoryTree(c.getId(), parentIdAndCategoryMap));
+            labelIdAndNameAndSub.setSubList(buildProductCategoryTree(c.getId(), parentIdAndCategoryMap));
 
-            result.add(categoryIdAndName);
+            result.add(labelIdAndNameAndSub);
         });
 
         return result;
