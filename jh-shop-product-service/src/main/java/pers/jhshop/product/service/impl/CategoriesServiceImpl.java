@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pers.jhshop.common.exception.ServiceException;
+import pers.jhshop.product.enums.CategoryParentIdLevelEnum;
 import pers.jhshop.product.mapper.CategoriesMapper;
 import pers.jhshop.product.model.entity.Categories;
 import pers.jhshop.product.model.req.CategoriesCreateReq;
@@ -218,45 +219,41 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
            return allCategoriesInfoVO;
         }
 
-        // 梳理标签层级关系
-        // 获取所有根分类，并转换为CategoryIdAndName
-        List<AllCategoriesInfoVO.CategoryIdAndName> allRootCategoryList = allCategoryList.stream()
-                .filter(c -> Objects.equals(c.getParentId(), 0L))
-                .map(c ->{
-                    AllCategoriesInfoVO.CategoryIdAndName categoryIdAndName = new AllCategoriesInfoVO.CategoryIdAndName();
-                    categoryIdAndName.setProductCategoryId(c.getId());
-                    categoryIdAndName.setProductCategoryName(c.getName());
-                    return categoryIdAndName;
-                })
-                .collect(Collectors.toList());
+        // 根据parent_id对商品类型进行分组
+        Map<Long, List<Categories>> parentIdAndCategoryMap = allCategoryList.stream()
+                .collect(Collectors.groupingBy(Categories::getParentId));
 
-        // 获取所有非根类标签
-        allCategoryList.stream()
-                .filter(c -> !Objects.equals(c.getParentId(), 0L))
-                .forEach(c ->{
-                    // 填充到对应的父类中
-                    Optional<AllCategoriesInfoVO.CategoryIdAndName> first = allRootCategoryList.stream()
-                            .filter(root -> Objects.equals(c.getParentId(), root.getProductCategoryId()))
-                            .findFirst();
-
-                    if (first.isPresent()){
-                        AllCategoriesInfoVO.CategoryIdAndName parentCategoryIdAndName = first.get();
-                        List<AllCategoriesInfoVO.CategoryIdAndName> subCategoryIdAndNameList = parentCategoryIdAndName.getSubCategoryIdAndNameList();
-                        if (CollectionUtils.isEmpty(subCategoryIdAndNameList)){
-                            subCategoryIdAndNameList = new ArrayList<>();
-                        }
-
-                        AllCategoriesInfoVO.CategoryIdAndName subCategoryIdAndName = new AllCategoriesInfoVO.CategoryIdAndName();
-                        subCategoryIdAndName.setProductCategoryId(c.getId());
-                        subCategoryIdAndName.setProductCategoryName(c.getName());
-                        subCategoryIdAndNameList.add(subCategoryIdAndName);
-                        parentCategoryIdAndName.setSubCategoryIdAndNameList(subCategoryIdAndNameList);
-                    }
-                });
-
-        // TODO 递归填充
-
+        // 梳理标签层级关系（递归填充获取分类）
+        List<AllCategoriesInfoVO.CategoryIdAndName> allRootCategoryList = buildProductCategoryTree(CategoryParentIdLevelEnum.ROOT_CATEGORY.getValue(), parentIdAndCategoryMap);
+        allCategoriesInfoVO.setAllCategoriesInfo(allRootCategoryList);
         return allCategoriesInfoVO;
+    }
+
+    /**
+     * 梳理标签层级关系（递归填充获取分类）
+     */
+    private List<AllCategoriesInfoVO.CategoryIdAndName> buildProductCategoryTree(Long parentId, Map<Long, List<Categories>> parentIdAndCategoryMap) {
+        List<AllCategoriesInfoVO.CategoryIdAndName> result = new ArrayList<>();
+
+        // 根据父ID从map中获取当前层级的子标签
+        List<Categories> childrenCategories = parentIdAndCategoryMap.get(parentId);
+        if (CollectionUtils.isEmpty(childrenCategories)){
+            // 已经没有子标签了，结束递归
+            return result;
+        }
+
+        // 遍历子标签集合
+        childrenCategories.forEach(c ->{
+            AllCategoriesInfoVO.CategoryIdAndName categoryIdAndName = new AllCategoriesInfoVO.CategoryIdAndName();
+            categoryIdAndName.setProductCategoryId(c.getId());
+            categoryIdAndName.setProductCategoryName(c.getName());
+            // 继续查找子标签
+            categoryIdAndName.setSubCategoryIdAndNameList(buildProductCategoryTree(c.getId(), parentIdAndCategoryMap));
+
+            result.add(categoryIdAndName);
+        });
+
+        return result;
     }
 
     private LambdaQueryWrapper<Categories> getLambdaQueryWrapper(CategoriesQueryReq queryReq) {
