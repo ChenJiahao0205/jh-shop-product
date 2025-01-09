@@ -249,6 +249,10 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
         // 梳理标签层级关系（递归填充获取分类）
         List<AllLabelIdAndNameAndSubVO.LabelIdAndNameAndSub> allRootCategoryList = buildProductCategoryTree(CategoryParentIdLevelEnum.ROOT_CATEGORY.getValue(), parentIdAndCategoryMap);
         allLabelIdAndNameAndSubVO.setAllCategoriesInfo(allRootCategoryList);
+
+        // 更新缓存
+        updateRedisAllProductCategories(allLabelIdAndNameAndSubVO);
+
         return allLabelIdAndNameAndSubVO;
     }
 
@@ -256,8 +260,15 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
      * 更新redis中的商品分类
      */
     private void updateRedisAllProductCategories() {
+        updateRedisAllProductCategories(getAllProductCategories(false));
+    }
+
+    /**
+     * 更新redis中的商品分类
+     */
+    private void updateRedisAllProductCategories(AllLabelIdAndNameAndSubVO allLabelIdAndNameAndSubVO) {
         stringRedisTemplate.opsForValue()
-                .set(RedisKeyConstants.ALL_PRODUCT_CATEGORY_REDIS_KEY, JSONObject.toJSONString(getAllProductCategories(false)));
+                .set(RedisKeyConstants.ALL_PRODUCT_CATEGORY_REDIS_KEY, JSONObject.toJSONString(allLabelIdAndNameAndSubVO));
     }
 
     /**
