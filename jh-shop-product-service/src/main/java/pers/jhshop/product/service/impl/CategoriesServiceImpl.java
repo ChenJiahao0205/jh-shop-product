@@ -1,6 +1,8 @@
 package pers.jhshop.product.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -9,10 +11,13 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pers.jhshop.common.exception.ServiceException;
+import pers.jhshop.product.consts.RedisKeyConstants;
 import pers.jhshop.product.enums.CategoryParentIdLevelEnum;
 import pers.jhshop.product.mapper.CategoriesMapper;
 import pers.jhshop.product.model.entity.Categories;
@@ -40,6 +45,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categories> implements ICategoriesService {
 
+    private final StringRedisTemplate stringRedisTemplate;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -73,7 +79,8 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
             throw new ServiceException("数据插入失败");
         }
 
-        // TODO 更新 Redis
+        // 更新Redis（重新获取一遍所有标签）
+        updateRedisAllProductCategories();
     }
 
     @Override
@@ -117,7 +124,8 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
             throw new ServiceException("数据更新失败");
         }
 
-        // TODO 更新 Redis
+        // 更新Redis（重新获取一遍所有标签）
+        updateRedisAllProductCategories();
     }
 
     @Override
@@ -210,13 +218,28 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
 
     @Override
     public AllLabelIdAndNameAndSubVO getAllProductCategories() {
-        // TODO 优先查询Redis
+        return getAllProductCategories(true);
+    }
+
+    /**
+     * 获取所有标签（是否查询缓存）
+     * @param queryRedisFlag
+     * @return true：查询缓存，false：跳过缓存，直接查询数据库
+     */
+    private AllLabelIdAndNameAndSubVO getAllProductCategories(Boolean queryRedisFlag) {
+        // 优先查询Redis
+        if (BooleanUtils.isTrue(queryRedisFlag)){
+            String allProductCategories = stringRedisTemplate.opsForValue().get(RedisKeyConstants.ALL_PRODUCT_CATEGORY_REDIS_KEY);
+            if (StringUtils.isNotBlank(allProductCategories)){
+                return JSON.parseObject(allProductCategories, AllLabelIdAndNameAndSubVO.class);
+            }
+        }
 
         AllLabelIdAndNameAndSubVO allLabelIdAndNameAndSubVO = new AllLabelIdAndNameAndSubVO();
         // 查询出所有标签
         List<Categories> allCategoryList = list();
         if (CollectionUtils.isEmpty(allCategoryList)){
-           return allLabelIdAndNameAndSubVO;
+            return allLabelIdAndNameAndSubVO;
         }
 
         // 根据parent_id对商品类型进行分组
@@ -227,6 +250,14 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
         List<AllLabelIdAndNameAndSubVO.LabelIdAndNameAndSub> allRootCategoryList = buildProductCategoryTree(CategoryParentIdLevelEnum.ROOT_CATEGORY.getValue(), parentIdAndCategoryMap);
         allLabelIdAndNameAndSubVO.setAllCategoriesInfo(allRootCategoryList);
         return allLabelIdAndNameAndSubVO;
+    }
+
+    /**
+     * 更新redis中的商品分类
+     */
+    private void updateRedisAllProductCategories() {
+        stringRedisTemplate.opsForValue()
+                .set(RedisKeyConstants.ALL_PRODUCT_CATEGORY_REDIS_KEY, JSONObject.toJSONString(getAllProductCategories(false)));
     }
 
     /**
